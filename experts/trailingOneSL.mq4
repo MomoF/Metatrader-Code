@@ -9,6 +9,7 @@
 #include <processError.mqh>
 
 extern bool allSymbols = false;
+extern bool closeBlacklisted = false;
 extern bool moveToMinDist = false;
 extern bool DEBUG = true;
 
@@ -84,6 +85,10 @@ int start()
     // static arrays for keeping track of managed trades
     static int 			managedOrders[][2];
     static int 			blacklist[];
+    int 				blacklistOld[];
+    
+    ArrayCopy(blacklistOld,blacklist);
+    ArrayResize(blacklist,0);
     
     // check if there are enough bars int the window, otherwise return
     if( Bars < 3 )
@@ -135,9 +140,12 @@ int start()
 			}
 			
 			// skip if order is blacklisted <=> should have already been closed
-			if (isInArray1D(blacklist,ticket) < 0)
+			if (isInArray1D(blacklistOld,ticket) < 0)
 			{
 //////////// ALERT?! ////////////
+				if(closeBlacklisted==true)
+					closeByTicket(ticket);
+				add2Blacklist(blacklist,ticket);
 				valid = false;
 			}
 			
@@ -207,7 +215,8 @@ int start()
 					}
 				}else
 				{
-					// if getting a new SL value failed, add this order to the blacklist!
+					if(closeBlacklisted==true)
+						closeByTicket(ticket);
 					add2Blacklist(blacklist,ticket);
 				}
 				
@@ -462,4 +471,49 @@ bool getTrailingSL(double & trailingSL,int openedBarsAgo, int type, int timefram
 		}	
 	}
 	return(true);
+}
+
+bool closeByTicket(int ticket)
+{
+	int type;
+	double orderLots;
+	bool ans;
+	
+	if (OrderSelect(ticket, SELECT_BY_TICKET) == true)
+	{
+		type           = OrderType();                    // Type of selected order           
+		orderLots      = OrderLots();                    // Amount of lots
+
+		while(true)                                  // Loop of closing orders     
+		{      
+			if ( type == 0)              // Order Buy is opened..        
+			{                                       // and there is criterion to close         
+				RefreshRates();                        // Refresh rates         
+				ans = OrderClose( ticket, orderLots, Bid, 5 );      // Closing Buy
+
+				if ( ans )                         // Success :)           
+					return(true);                              // Exit closing loop           
+			  
+				if ( processError( GetLastError() ) == 1 )      // Processing errors            
+					continue;                           // Retrying
+
+				return(false);                                // Exit start()        
+			}
+
+			if ( type == 1)                // Order Sell is opened..        
+			{                                       // and there is criterion to close         
+				RefreshRates();                        // Refresh rates         
+				ans = OrderClose( ticket, orderLots, Ask, 5 );      // Closing Sell         
+				if (ans )                         // Success :)                      
+					return(true);
+
+				if ( processError( GetLastError() ) == 1 )      // Processing errors            
+					continue;                           // Retrying         
+				
+				return(false);                                // Exit start()        
+			}      
+			break;                                    // Exit while     
+		}
+	}
+	return(false);
 }
