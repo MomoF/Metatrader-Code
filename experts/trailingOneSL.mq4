@@ -8,7 +8,7 @@
 
 #include <processError.mqh>
 
-extern bool allSymbols = false;
+extern bool allSymbols = true;
 extern bool closeBlacklisted = false;
 extern bool moveToMinDist = false;
 extern bool DEBUG = true;
@@ -87,8 +87,11 @@ int start()
     static int 			blacklist[];
     int 				blacklistOld[];
     
-    ArrayCopy(blacklistOld,blacklist);
-    ArrayResize(blacklist,0);
+    if(ArraySize(blacklist)>0)
+    {  
+        ArrayCopy(blacklistOld,blacklist);
+        ArrayResize(blacklist,0);
+    }
     
     // check if there are enough bars int the window, otherwise return
     if( Bars < 3 )
@@ -142,7 +145,6 @@ int start()
 			// skip if order is blacklisted <=> should have already been closed
 			if (isInArray1D(blacklistOld,ticket) < 0)
 			{
-//////////// ALERT?! ////////////
 				if(closeBlacklisted==true)
 					closeByTicket(ticket);
 				add2Blacklist(blacklist,ticket);
@@ -159,6 +161,7 @@ int start()
 				if( allSymbols == true )
 				{
 					symb = OrderSymbol();
+					Print("Setting Symbol to " + symb);
 				}
 				
 				// debug printing          
@@ -175,8 +178,8 @@ int start()
 				{
 					if(DEBUG==True)
 					{
-						Alert("Order is already in dynamic array at pos " + pos);
-						Alert("Was updated " + iBarShift(symb, timeframe, managedOrders[pos][1]) + " bars ago");
+						Print("Order is already in dynamic array at pos " + pos);
+						Print("Was updated " + iBarShift(symb, timeframe, managedOrders[pos][1]) + " bars ago");
 					}
 					// check if SL was already changed during this bar
 					if (iBarShift(symb, timeframe, managedOrders[pos][1]) == 0)
@@ -196,22 +199,20 @@ int start()
 					}
 					
 					// change SL if different from current SL
-					if( trailingSL != OrderStopLoss() )
+					if( ( trailingSL == OrderStopLoss() ) || (moveSL( ticket, type, symb, trailingSL ) ) )
 					{
 						// try to move SL, if it fails, order will be processed again upon the next incoming tick
-						if (moveSL( ticket, type, symb, trailingSL ))
+						// update mangedOrders array upon success
+						now = TimeCurrent();
+						pos = isInArray2D(managedOrders, ticket);
+						if ( pos >= 0 )
 						{
-							// update mangedOrders array upon success
-							now = TimeCurrent();
-							pos = isInArray2D(managedOrders, ticket);
-							if ( pos >= 0 )
-							{
-								Alert("Yeah!");
-								managedOrders[pos][1]=now;
-							}else{
-								addTicketTime(managedOrders, ticket, now);
-							}							
-						}
+							Print("Order is in Array, updating time");
+							managedOrders[pos][1]=now;
+						}else{
+						    Print("Adding order to Array");
+							addTicketTime(managedOrders, ticket, now);
+						}							
 					}
 				}else
 				{
@@ -241,7 +242,7 @@ bool moveSL(int ticket, int type, string symb, double newSL)
 	{
 		if (type == OP_BUY)
 		{	
-			currentPrice  = Bid;
+			currentPrice  = MarketInfo(symb,MODE_BID);
 			
 			// check if the new SL is valid, use minimum valid SL if in moveToMinDist mode
    			if( ( newSL > ( currentPrice - ( minDist * Point ) ) ) )  
@@ -272,10 +273,10 @@ bool moveSL(int ticket, int type, string symb, double newSL)
 			}
 		}else if (type == OP_SELL)
 		{
-			currentPrice  = Ask;
+			currentPrice  = MarketInfo(symb,MODE_ASK);
 			
 			// check if the new SL is valid, use minimum valid SL if in moveToMinDist mode
-   			if( ( newSL < currentPrice + (minDist * Point) ) )
+   			if( newSL < (currentPrice + (minDist * Point) ) )
    			{
    				if (moveToMinDist)
       			{
@@ -283,7 +284,7 @@ bool moveSL(int ticket, int type, string symb, double newSL)
       			}else
       			{
    					Alert("StopLoss too close!");
-						return(false);
+					return(false);
 				}
 			}
    	
@@ -478,18 +479,20 @@ bool closeByTicket(int ticket)
 	int type;
 	double orderLots;
 	bool ans;
+	string symb;
 	
 	if (OrderSelect(ticket, SELECT_BY_TICKET) == true)
 	{
 		type           = OrderType();                    // Type of selected order           
 		orderLots      = OrderLots();                    // Amount of lots
-
+		symb           = OrderSymbol();
+    
 		while(true)                                  // Loop of closing orders     
 		{      
 			if ( type == 0)              // Order Buy is opened..        
 			{                                       // and there is criterion to close         
 				RefreshRates();                        // Refresh rates         
-				ans = OrderClose( ticket, orderLots, Bid, 5 );      // Closing Buy
+				ans = OrderClose( ticket, orderLots, MarketInfo(symb,MODE_BID), 5 );      // Closing Buy
 
 				if ( ans )                         // Success :)           
 					return(true);                              // Exit closing loop           
@@ -503,7 +506,7 @@ bool closeByTicket(int ticket)
 			if ( type == 1)                // Order Sell is opened..        
 			{                                       // and there is criterion to close         
 				RefreshRates();                        // Refresh rates         
-				ans = OrderClose( ticket, orderLots, Ask, 5 );      // Closing Sell         
+				ans = OrderClose( ticket, orderLots, MarketInfo(symb,MODE_ASK), 5 );      // Closing Sell         
 				if (ans )                         // Success :)                      
 					return(true);
 
