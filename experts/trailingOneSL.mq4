@@ -161,7 +161,8 @@ int start()
 				if( allSymbols == true )
 				{
 					symb = OrderSymbol();
-					Print("Setting Symbol to " + symb);
+					if(DEBUG==True)
+					   Print("Setting Symbol to " + symb);
 				}
 				
 				// debug printing          
