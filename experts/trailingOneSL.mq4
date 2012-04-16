@@ -344,7 +344,7 @@ bool getTrailingSL(double & trailingSL,int openedBarsAgo, int type, int timefram
 				if (type == OP_BUY){
 					if ( iClose(symb, timeframe, offset + 1 ) <= iHigh(symb, timeframe, offset + 2) )
 					{
-						trailingSL 		= (iLow(symb, timeframe, offset + 2) - 0.1*( iHigh(symb, timeframe, offset + 2) * iLow(symb, timeframe, offset + 2) ));
+						trailingSL 		= (iLow(symb, timeframe, offset + 2) - 0.1*( iHigh(symb, timeframe, offset + 2) - iLow(symb, timeframe, offset + 2) ));
 						innenstabAktiv = true;
 						aussenstabLow 	= iLow(symb, timeframe, offset + 2);
 						aussenstabHigh = iHigh(symb, timeframe, offset + 2);
@@ -354,7 +354,7 @@ bool getTrailingSL(double & trailingSL,int openedBarsAgo, int type, int timefram
 				{
 					if ( iClose(symb, timeframe, offset + 1 ) >= iLow(symb, timeframe, offset + 2) )
 					{
-						trailingSL = (iHigh(symb, timeframe, offset + 2) + 0.1*( iHigh(symb, timeframe, offset + 2) * iLow(symb, timeframe, offset + 2) ));
+						trailingSL = (iHigh(symb, timeframe, offset + 2) + 0.1*( iHigh(symb, timeframe, offset + 2) - iLow(symb, timeframe, offset + 2) ));
 						innenstabAktiv = true;
 						aussenstabLow 	= iLow(symb, timeframe, offset + 2);
 						aussenstabHigh = iHigh(symb, timeframe, offset + 2);
