@@ -161,16 +161,12 @@ int start()
 				if( allSymbols == true )
 				{
 					symb = OrderSymbol();
-					if(DEBUG==True)
-					   Print("Setting Symbol to " + symb);
 				}
 				
 				// debug printing          
 				if(DEBUG==True)
 				{
-					Print("Found order: " + ticket);
-					Print("Timeframe:   " + timeframe);
-					Print("Symbol:      " + symb);
+					Print("Found order: Ticket " + ticket + ", Symbol" + symb + ", Timeframe: " + timeframe );
 				}
 				
 				// check if order is in managedOrders array
@@ -179,8 +175,7 @@ int start()
 				{
 					if(DEBUG==True)
 					{
-						Print("Order is already in dynamic array at pos " + pos);
-						Print("Was updated " + iBarShift(symb, timeframe, managedOrders[pos][1]) + " bars ago");
+						Print("Order is already in dynamic array at pos " + pos + ", updated " + iBarShift(symb, timeframe, managedOrders[pos][1]) + " bars ago");
 					}
 					// check if SL was already changed during this bar
 					if (iBarShift(symb, timeframe, managedOrders[pos][1]) == 0)
@@ -195,8 +190,7 @@ int start()
 				{
 					if(DEBUG==True)
 					{
-						Print("Order was opened " + barsAgo + " bars ago!");
-						Print("New SL is " + trailingSL);
+						Print("Order was opened " + barsAgo + " bars ago, new SL is " + trailingSL);
 					}
 					
 					// change SL if different from current SL
@@ -217,6 +211,10 @@ int start()
 					}
 				}else
 				{
+					if(DEBUG==True)
+					{
+						Print("Failed to get new SL!")
+					}
 					if(closeBlacklisted==true)
 						closeByTicket(ticket);
 					add2Blacklist(blacklist,ticket);
@@ -470,7 +468,8 @@ bool getTrailingSL(double & trailingSL,int openedBarsAgo, int type, int timefram
 						}
 					}
 				}
-		}	
+		}
+		Print("Trailing SL after " + i  + " bars: " + trailingSL )		
 	}
 	return(true);
 }
