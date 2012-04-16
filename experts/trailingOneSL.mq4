@@ -57,6 +57,7 @@ void add2Blacklist(int& array[], int key)
 	int currentSize = ArraySize(array);
 	ArrayResize(array, currentSize + 1);
 	array[currentSize] = key;
+	Print("New blacklist size: " + ArraySize(array));
 }
 
 void addTicketTime(int& array[][2], int key, int now)
@@ -86,6 +87,8 @@ int start()
     static int 			managedOrders[][2];
     static int 			blacklist[];
     int 				blacklistOld[];
+    
+    Print("Size of blacklist: " + ArraySize(blacklist));
     
     if(ArraySize(blacklist)>0)
     {  
@@ -143,11 +146,17 @@ int start()
 			}
 			
 			// skip if order is blacklisted <=> should have already been closed
-			if (isInArray1D(blacklistOld,ticket) < 0)
+			if (isInArray1D(blacklistOld,ticket) >= 0)
 			{
 				if(closeBlacklisted==true)
 					closeByTicket(ticket);
 				add2Blacklist(blacklist,ticket);
+				
+				if(DEBUG==True)
+				{
+					Print("Found blacklisted order: Ticket " + ticket );
+				}
+				
 				valid = false;
 			}
 			
@@ -213,7 +222,7 @@ int start()
 				{
 					if(DEBUG==True)
 					{
-						Print("Failed to get new SL!");
+						Print("Failed to get new SL! Adding order " + ticket + " to blacklist!");
 					}
 					if(closeBlacklisted==true)
 						closeByTicket(ticket);
