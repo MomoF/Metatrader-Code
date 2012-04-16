@@ -213,7 +213,7 @@ int start()
 				{
 					if(DEBUG==True)
 					{
-						Print("Failed to get new SL!")
+						Print("Failed to get new SL!");
 					}
 					if(closeBlacklisted==true)
 						closeByTicket(ticket);
@@ -469,7 +469,7 @@ bool getTrailingSL(double & trailingSL,int openedBarsAgo, int type, int timefram
 					}
 				}
 		}
-		Print("Trailing SL after " + i  + " bars: " + trailingSL )		
+		Print("Trailing SL after " + i  + " bars: " + trailingSL );	
 	}
 	return(true);
 }
