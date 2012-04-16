@@ -57,7 +57,6 @@ void add2Blacklist(int& array[], int key)
 	int currentSize = ArraySize(array);
 	ArrayResize(array, currentSize + 1);
 	array[currentSize] = key;
-	Print("New blacklist size: " + ArraySize(array));
 }
 
 void addTicketTime(int& array[][2], int key, int now)
@@ -87,8 +86,6 @@ int start()
     static int 			managedOrders[][2];
     static int 			blacklist[];
     int 				blacklistOld[];
-    
-    Print("Size of blacklist: " + ArraySize(blacklist));
     
     if(ArraySize(blacklist)>0)
     {  
