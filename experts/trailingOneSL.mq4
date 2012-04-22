@@ -170,19 +170,19 @@ int start()
 				}
 				
 				// debug printing          
-				if(DEBUG==True)
-				{
-					Print("Found order: Ticket " + ticket + ", Symbol" + symb + ", Timeframe: " + timeframe );
-				}
+				//if(DEBUG==True)
+				//{
+				//	Print("Found order: Ticket " + ticket + ", Symbol" + symb + ", Timeframe: " + timeframe );
+				//}
 				
 				// check if order is in managedOrders array
 				pos 		= isInArray2D(managedOrders, ticket);
 				if( ( pos >= 0) )
 				{
-					if(DEBUG==True)
-					{
-						Print("Order is already in dynamic array at pos " + pos + ", updated " + iBarShift(symb, timeframe, managedOrders[pos][1]) + " bars ago");
-					}
+					//if(DEBUG==True)
+					//{
+					//	Print("Order is already in dynamic array at pos " + pos + ", updated " + iBarShift(symb, timeframe, managedOrders[pos][1]) + " bars ago");
+					//}
 					// check if SL was already changed during this bar
 					if (iBarShift(symb, timeframe, managedOrders[pos][1]) == 0)
 						continue;
@@ -196,28 +196,56 @@ int start()
 				{
 					if(DEBUG==True)
 					{
-						Print("Order was opened " + barsAgo + " bars ago, new SL is " + trailingSL);
+						Print("Order was opened " + barsAgo + " bars ago, new SL is " + trailingSL + ", previos was " + OrderStopLoss());
 					}
 					
 					// change SL if different from current SL
-					if( ( trailingSL == OrderStopLoss() ) || (moveSL( ticket, type, symb, trailingSL ) ) )
+					if( NormalizeDouble(trailingSL,5) == NormalizeDouble(OrderStopLoss(),5) )
 					{
 						// try to move SL, if it fails, order will be processed again upon the next incoming tick
 						// update mangedOrders array upon success
 						now = TimeCurrent();
 						pos = isInArray2D(managedOrders, ticket);
+						if( DEBUG == true )
+						    Print("SL did not change");
 						if ( pos >= 0 )
 						{
-							Print("Order is in Array, updating time");
+							if( DEBUG == true )
+							    Print("Order is in Array, updating time");
+							    
 							managedOrders[pos][1]=now;
 						}else{
-						    Print("Adding order to Array");
+						    if( DEBUG == true )
+						        Print("Adding order to Array");
+						        
+							addTicketTime(managedOrders, ticket, now);
+						}							
+					}else if( moveSL( ticket, type, symb, trailingSL ) )
+					{
+						// try to move SL, if it fails, order will be processed again upon the next incoming tick
+						// update mangedOrders array upon success
+						
+						now = TimeCurrent();
+						pos = isInArray2D(managedOrders, ticket);
+						if( DEBUG == true )
+						    Print("SL was changed");
+						if ( pos >= 0 )
+						{
+							if( DEBUG == true )
+							    Print("Order is in Array, updating time");
+							    
+							managedOrders[pos][1]=now;
+						}else{
+						    if( DEBUG == true )
+						        Print("Adding order to Array");
+						        
 							addTicketTime(managedOrders, ticket, now);
 						}							
 					}
+					
 				}else
 				{
-					if(DEBUG==True)
+					if(DEBUG==true)
 					{
 						Print("Failed to get new SL! Adding order " + ticket + " to blacklist!");
 					}
