@@ -18,8 +18,8 @@ int processError( int error )                        // Function of processing e
                RefreshRates();                        // Refresh rates         
                return(1);                             // Exit the function      
       case 136:Alert("No prices. Waiting for a new tick..");         
-               while(RefreshRates()==false)           // Till a new tick            
-               Sleep(1);                           // Pause in the loop         
+               Sleep(5000);                           // Pause in the loop         
+               RefreshRates();           // Till a new tick            
                return(1);                             // Exit the function      
       case 137:Alert("Broker is busy. Trying once again..");         
                Sleep(3000);                           // Simple solution         
