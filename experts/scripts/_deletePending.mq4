@@ -17,7 +17,7 @@ int start()
     int ticket = -1;
     double distance = 0;
     double newSL = WindowPriceOnDropped();
-
+    
     for( int i = 0; i < OrdersTotal(); i++ )          // Loop through orders     
     {      
         if( OrderSelect(i, SELECT_BY_POS, MODE_TRADES) == true ) // If there is the next one        
@@ -26,20 +26,23 @@ int start()
             {
                 if ( OrderType() > 1)
                 {
-                    if ( ( i == 0) || ( MathAbs(WindowPriceOnDropped() - OrderOpenPrice()) < distance ) )
+                    
+                    if ( ( ticket < 0) || ( MathAbs(WindowPriceOnDropped() - OrderOpenPrice()) < distance ) )
                     {
                         distance = MathAbs(WindowPriceOnDropped() - OrderOpenPrice());
-                        ticket =OrderTicket();
+                        ticket = OrderTicket();
                     }
                 }
             }
         }     
     }
-    
+   
     if (ticket >= 0)
     {
-   	    while(true)
+        i = 0;
+   	    while(i <= 5)
    	    {
+   	        i++;
       	    if( OrderDelete( ticket ))
       	    {
          	    Alert("Pending order ", ticket, " was deleted");
