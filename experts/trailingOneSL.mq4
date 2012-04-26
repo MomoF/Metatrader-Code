@@ -269,10 +269,14 @@ bool moveSL(int ticket, int type, string symb, double newSL)
 	double 	currentTP;
 	double 	currentPrice;
 	bool ans;
+	int i = 0;
+	
 	
 	// enter loop in order to deal with error occurence
-	while(true)
+	while(i <= 5)
 	{
+	   i++;
+	   RefreshRates();
 		if (type == OP_BUY)
 		{	
 			currentPrice  = MarketInfo(symb,MODE_BID);
@@ -338,6 +342,7 @@ bool moveSL(int ticket, int type, string symb, double newSL)
 		}
 		break;
 	}
+	Alert("Could not close order " + ticket + " due to an technical error!");
 	return(false);
 }
 
@@ -408,25 +413,30 @@ bool getTrailingSL(double & trailingSL,int openedBarsAgo, int type, int timefram
 					{ 
 						if( iClose(symb, timeframe, offset + 1) < aussenstabLow )
 						{
-							return(false);
 							innenstabAktiv = false;
+							Print("Innenstab close negative after " + i  + " bars");
+							return(false);
 						}else if( iClose(symb, timeframe, offset + 1) > aussenstabHigh )
 						{
-							trailingSL = iLow(symb, timeframe, i + 1);
+							trailingSL = iLow(symb, timeframe, offset + 1);
 							innenstabAktiv = false;
+							Print("Innenstab close positive after " + i  + " bars");
 						}
 					}else if (type == OP_SELL)
 					{
-						if(iClose(symb, timeframe, i + 1) > aussenstabHigh)
+						if(iClose(symb, timeframe, offset + 1) > aussenstabHigh)
 						{
+							innenstabAktiv = false;
+							Print("Innenstab close negative after " + i  + " bars");
 							return(false);
-							innenstabAktiv = false;
-						}else if( iClose(symb, timeframe, i + 1) < aussenstabLow)
+						}else if( iClose(symb, timeframe, offset + 1) < aussenstabLow)
 						{
-							trailingSL = iHigh(symb, timeframe, i + 1);
+							trailingSL = iHigh(symb, timeframe, offset + 1);
 							innenstabAktiv = false;
+							Print("Innenstab close positive after " + i  + " bars");
 						}
-					}	
+					}
+					Print("Innenstab still active after " + i  + " bars");	
 				}else
 				{
 					// we haven't been in an Innenstab situation previously
@@ -439,6 +449,8 @@ bool getTrailingSL(double & trailingSL,int openedBarsAgo, int type, int timefram
 						innenstabAktiv = true;
 						aussenstabHigh = iHigh(symb, timeframe, offset + 2);
 						aussenstabLow 	= iLow(symb, timeframe, offset + 2);
+						
+						Print("Innenstab beginning after " + i  + " bars");
 						
 						// encountered a new Innenstab case
 						// set the SL to the pre-Aussenstab level, if it makes sense.
@@ -514,15 +526,17 @@ bool closeByTicket(int ticket)
 	double orderLots;
 	bool ans;
 	string symb;
+	int i;
 	
 	if (OrderSelect(ticket, SELECT_BY_TICKET) == true)
 	{
 		type           = OrderType();                    // Type of selected order           
 		orderLots      = OrderLots();                    // Amount of lots
 		symb           = OrderSymbol();
-    
-		while(true)                                  // Loop of closing orders     
+        i = 0;
+		while(i <= 5)                                  // Loop of closing orders     
 		{      
+	        i++;
 			if ( type == 0)              // Order Buy is opened..        
 			{                                       // and there is criterion to close         
 				RefreshRates();                        // Refresh rates         
@@ -551,6 +565,7 @@ bool closeByTicket(int ticket)
 			}      
 			break;                                    // Exit while     
 		}
+		Alert("Could not close order " + ticket + " due to an technical error!");
 	}
 	return(false);
 }
