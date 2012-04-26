@@ -409,23 +409,23 @@ double EquityAtRisk(double LotSize, double StopLossPrice, int CurrentOrderType, 
     {
       case 1   :  switch(CurrentOrderType)
                      {
-                     case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (bid - StopLossPrice)/StopLossPrice , 2));
+                     //case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (bid - StopLossPrice)/StopLossPrice , 2));
+                     case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (openPrice - StopLossPrice)/StopLossPrice , 2));
                      case OP_BUYSTOP	: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (openPrice - StopLossPrice)/StopLossPrice , 2));
-                     case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - ask)/StopLossPrice , 2));
+                     //case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - ask)/StopLossPrice , 2));
+                     case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - openPrice)/StopLossPrice , 2));
                      case OP_SELLSTOP	: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - openPrice)/StopLossPrice , 2));
-                     //case OP_BUY    :  CalculatedEquityAtRisk=-MarketInfo(CurrentSymbol,MODE_LOTSIZE)*LotSize*(StopLossPrice-Ask)/StopLossPrice; break;
-                     //case OP_SELL   :  CalculatedEquityAtRisk=-MarketInfo(CurrentSymbol,MODE_LOTSIZE)*LotSize*(Bid-StopLossPrice)/StopLossPrice; break;
                      default        :  Print("Error encountered in the OrderType() routine for calculating the EquityAtRisk"); // The expression did not generate a case value
                      }
                   break;
       case 2   :  switch(CurrentOrderType)
                      {
-                     case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (bid - StopLossPrice) , 2));
+                     //case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (bid - StopLossPrice) , 2));
+                     case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (openPrice - StopLossPrice) , 2));
                      case OP_BUYSTOP	: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (openPrice - StopLossPrice) , 2));
-                     case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - ask) , 2));
+                     //case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - ask) , 2));
+                     case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - openPrice) , 2));
                      case OP_SELLSTOP	: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - openPrice) , 2));
-                     //case OP_BUY    :  CalculatedEquityAtRisk=-MarketInfo(CurrentSymbol,MODE_LOTSIZE)*LotSize*(StopLossPrice-Ask); break;
-                     //case OP_SELL   :  CalculatedEquityAtRisk=-MarketInfo(CurrentSymbol,MODE_LOTSIZE)*LotSize*(Bid-StopLossPrice); break;
                      default        :  Print("Error encountered in the OrderType() routine for calculating the EquityAtRisk"); // The expression did not generate a case value
                      }
                   break;
@@ -433,23 +433,23 @@ double EquityAtRisk(double LotSize, double StopLossPrice, int CurrentOrderType, 
                   // falls thru and is treated the same as SymbolType()==4 for the purpose of these calculations
       case 4   :  switch(CurrentOrderType)  // e.g. Symbol() = AUDCAD, the counter currency is CAD and the USD is the base to the CAD in the pair USDCAD
                      {
+                     //case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (bid - StopLossPrice) / MarketInfo(CurrentCounterPairForCross, MODE_BID) , 2));
                      case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (bid - StopLossPrice) / MarketInfo(CurrentCounterPairForCross, MODE_BID) , 2));
                      case OP_BUYSTOP	: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (openPrice - StopLossPrice) / MarketInfo(CurrentCounterPairForCross, MODE_BID) , 2));
+                     //case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - ask) / MarketInfo(CurrentCounterPairForCross, MODE_ASK) , 2));
                      case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - ask) / MarketInfo(CurrentCounterPairForCross, MODE_ASK) , 2));
                      case OP_SELLSTOP	: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * LotSize * (StopLossPrice - openPrice) / MarketInfo(CurrentCounterPairForCross, MODE_ASK), 2));
-                     //case OP_BUY    :  CalculatedEquityAtRisk=-MarketInfo(CurrentSymbol,MODE_LOTSIZE)*LotSize*(StopLossPrice-Ask)/MarketInfo(CurrentCounterPairForCross,MODE_BID); break;
-                     //case OP_SELL   :  CalculatedEquityAtRisk=-MarketInfo(CurrentSymbol,MODE_LOTSIZE)*LotSize*(Bid-StopLossPrice)/MarketInfo(CurrentCounterPairForCross,MODE_ASK); break;
                      default        :  Print("Error encountered in the OrderType() routine for calculating the EquityAtRisk"); // The expression did not generate a case value
                      }
                   break;
       case 5   :  switch(CurrentOrderType)  // e.g. Symbol() = EURGBP, the counter currency is GBP and the USD is the counter to the GBP in the pair GBPUSD
                      {
-                     case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * MarketInfo(CurrentCounterPairForCross, MODE_BID) * LotSize * (bid - StopLossPrice) , 2));
+                     //case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * MarketInfo(CurrentCounterPairForCross, MODE_BID) * LotSize * (bid - StopLossPrice) , 2));
+                     case OP_BUY		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * MarketInfo(CurrentCounterPairForCross, MODE_BID) * LotSize * (openPrice - StopLossPrice) , 2));
                      case OP_BUYSTOP	: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * MarketInfo(CurrentCounterPairForCross, MODE_BID) * LotSize * (openPrice - StopLossPrice) , 2));
-                     case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * MarketInfo(CurrentCounterPairForCross, MODE_ASK) * LotSize * (StopLossPrice - ask) , 2));
+                     //case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * MarketInfo(CurrentCounterPairForCross, MODE_ASK) * LotSize * (StopLossPrice - ask) , 2));
+                     case OP_SELL		: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * MarketInfo(CurrentCounterPairForCross, MODE_ASK) * LotSize * (StopLossPrice - openPrice) , 2));
                      case OP_SELLSTOP	: return(NormalizeDouble( - MarketInfo(CurrentSymbol, MODE_LOTSIZE) * MarketInfo(CurrentCounterPairForCross, MODE_ASK) * LotSize * (StopLossPrice - openPrice) , 2));
-                     //case OP_BUY    :  CalculatedEquityAtRisk=-MarketInfo(CurrentSymbol,MODE_LOTSIZE)*MarketInfo(CurrentCounterPairForCross,MODE_BID)*LotSize*(StopLossPrice-Ask); break;
-                     //case OP_SELL   :  CalculatedEquityAtRisk=-MarketInfo(CurrentSymbol,MODE_LOTSIZE)*MarketInfo(CurrentCounterPairForCross,MODE_ASK)*LotSize*(Bid-StopLossPrice); break;
                      default        :  Print("Error encountered in the OrderType() routine for calculating the EquityAtRisk"); // The expression did not generate a case value
                      }
                   break;
